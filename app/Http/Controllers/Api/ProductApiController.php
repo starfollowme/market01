@@ -12,7 +12,7 @@ class ProductApiController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Product::with('category')->where('is_active', true);
+        $query = Product::with('category');
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn ($q) => $q->where('slug', $request->category));
@@ -29,16 +29,11 @@ class ProductApiController extends Controller
 
     public function show(Product $product): JsonResponse
     {
-        if (! $product->is_active) {
-            return response()->json(['message' => 'Produk tidak ditemukan.'], 404);
-        }
-
         $product->load('category');
 
         $related = Product::with('category')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->where('is_active', true)
             ->take(4)
             ->get();
 
@@ -50,7 +45,7 @@ class ProductApiController extends Controller
 
     public function categories(): JsonResponse
     {
-        $categories = Category::withCount(['products' => fn ($q) => $q->where('is_active', true)])->get();
+        $categories = Category::withCount('products')->get();
 
         return response()->json($categories);
     }

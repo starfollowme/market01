@@ -17,7 +17,11 @@ class ApiClient {
       baseUrl: AppConstants.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
-      headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
     ));
 
     dio.httpClientAdapter = IOHttpClientAdapter(
