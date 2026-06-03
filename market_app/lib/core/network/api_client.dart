@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 
@@ -17,6 +19,14 @@ class ApiClient {
       receiveTimeout: const Duration(seconds: 15),
       headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
     ));
+
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        return client;
+      },
+    );
 
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
