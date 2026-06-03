@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'core/router/app_router.dart';
 import 'providers/auth_provider.dart';
-import 'providers/cart_provider.dart';
+
 import 'providers/order_provider.dart';
 import 'providers/product_provider.dart';
 
@@ -35,17 +35,17 @@ class _MarketAppState extends State<MarketApp> {
       providers: [
         ChangeNotifierProvider.value(value: _authProvider),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()),
+
         ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: MaterialApp.router(
-        title: 'Market',
+        title: 'Rentdago',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF6366F1),
-            primary: const Color(0xFF6366F1),
-            secondary: const Color(0xFFEC4899),
+            seedColor: const Color(0xFF2563EB), // Blue primary
+            primary: const Color(0xFF2563EB),
+            secondary: const Color(0xFFF59E0B), // Amber secondary
           ),
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFFF8FAFC),
@@ -64,7 +64,7 @@ class _MarketAppState extends State<MarketApp> {
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
+              backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -74,8 +74,8 @@ class _MarketAppState extends State<MarketApp> {
           ),
           outlinedButtonTheme: OutlinedButtonThemeData(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF6366F1),
-              side: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+              foregroundColor: const Color(0xFF2563EB),
+              side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -93,7 +93,7 @@ class _MarketAppState extends State<MarketApp> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
@@ -105,7 +105,7 @@ class _MarketAppState extends State<MarketApp> {
           ),
           chipTheme: ChipThemeData(
             backgroundColor: const Color(0xFFEEF2FF),
-            selectedColor: const Color(0xFF6366F1),
+            selectedColor: const Color(0xFF2563EB),
             labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

@@ -3,37 +3,74 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
 
-    protected function casts(): array
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'phone',
+        'role',
+        'avatar',
+        'password',
+        'phone_verified_at',
+       
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'phone_verified_at' => 'datetime',
+       
+    ];
+
+    public function shop()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(Shop::class);
     }
 
-    public function carts(): HasMany
+    public function products()
     {
-        return $this->hasMany(Cart::class);
+        return $this->hasMany(Product::class, 'shop_id');
     }
 
-    public function orders(): HasMany
+    public function vouchers()
     {
-        return $this->hasMany(Order::class);
+         return $this->belongsToMany(Voucher::class, 'user_vouchers')
+                    ->withPivot('claimed_at')  // ← Hapus 'usage_count'
+                    ->withTimestamps()
+                    ->using(UserVoucher::class);
     }
+
+
+    
+public function courier()
+{
+    return $this->hasOne(Courier::class);
+}
+
+public function couriersCreated()
+{
+    return $this->hasMany(Courier::class, 'created_by');
+}
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+
+
 }

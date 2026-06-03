@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../providers/cart_provider.dart';
+import 'package:intl/intl.dart';
+import '../../data/models/product_model.dart';
 import '../../providers/order_provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  final ProductModel? product;
+  final ProductRentalModel? rental;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int days;
+  final double totalPrice;
+
+  const CheckoutScreen({
+    super.key,
+    this.product,
+    this.rental,
+    this.startDate,
+    this.endDate,
+    this.days = 0,
+    this.totalPrice = 0.0,
+  });
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -13,17 +29,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _addressCtrl = TextEditingController();
-  final _phoneCtrl   = TextEditingController();
-  final _notesCtrl   = TextEditingController();
-
-  @override
-  void dispose() {
-    _addressCtrl.dispose();
-    _phoneCtrl.dispose();
-    _notesCtrl.dispose();
-    super.dispose();
-  }
+  String _deliveryMethod = 'pickup';
 
   String _fmt(double price) {
     final str = price.toStringAsFixed(0);
@@ -39,18 +45,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _placeOrder() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    if (widget.rental == null || widget.startDate == null || widget.endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data tidak lengkap'), backgroundColor: Colors.red),
+      );
+      return;
+    }
 
     final orderProv = context.read<OrderProvider>();
     final order = await orderProv.createOrder(
-      shippingAddress: _addressCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      notes: _notesCtrl.text.trim(),
+      productRentalId: widget.rental!.id,
+      startTime: DateFormat('yyyy-MM-dd').format(widget.startDate!),
+      endTime: DateFormat('yyyy-MM-dd').format(widget.endDate!),
+      deliveryMethod: _deliveryMethod,
     );
 
     if (!mounted) return;
 
     if (order != null) {
-      context.read<CartProvider>().clear();
       context.go('/orders');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pesanan berhasil dibuat'), backgroundColor: Colors.green),
@@ -64,8 +77,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cart    = context.watch<CartProvider>();
     final isLoading = context.watch<OrderProvider>().isLoading;
+
+    if (widget.product == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Checkout')),
+        body: const Center(child: Text('Data tidak valid')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout'), centerTitle: true),
@@ -85,23 +104,46 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       const Text('Ringkasan Pesanan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 12),
-                      ...cart.items.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(child: Text('${item.product?.name} ×${item.quantity}', overflow: TextOverflow.ellipsis)),
-                            Text('Rp ${_fmt(item.subtotal)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      )),
-                      const Divider(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 60, height: 60,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEF2FF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.car_rental, color: Color(0xFF2563EB)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(widget.product!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Rp ${_fmt(widget.rental?.price ?? 0)} / ${widget.rental?.cycleValue ?? 1} hari',
+                                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 32),
+                      _buildRow('Tanggal Mulai', DateFormat('dd MMM yyyy').format(widget.startDate!)),
+                      const SizedBox(height: 8),
+                      _buildRow('Tanggal Selesai', DateFormat('dd MMM yyyy').format(widget.endDate!)),
+                      const SizedBox(height: 8),
+                      _buildRow('Durasi Sewa', '${widget.days} hari'),
+                      const Divider(height: 32),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Rp ${_fmt(cart.total)}',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, fontSize: 18)),
+                          const Text('Total Biaya', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text('Rp ${_fmt(widget.totalPrice)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB), fontSize: 20)),
                         ],
                       ),
                     ],
@@ -110,42 +152,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
 
               const SizedBox(height: 20),
-              const Text('Informasi Pengiriman', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('Metode Pengiriman', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 12),
+              
+              Card(
+                child: Column(
+                  children: [
+                    RadioListTile<String>(
+                      title: const Text('Ambil di Toko (Pickup)'),
+                      value: 'pickup',
+                      groupValue: _deliveryMethod,
+                      activeColor: const Color(0xFF2563EB),
+                      onChanged: (v) => setState(() => _deliveryMethod = v!),
+                    ),
+                    const Divider(height: 1),
+                    RadioListTile<String>(
+                      title: const Text('Kirim ke Alamat (Delivery)'),
+                      value: 'delivery',
+                      groupValue: _deliveryMethod,
+                      activeColor: const Color(0xFF2563EB),
+                      onChanged: widget.rental?.isDelivery == 'yes'
+                          ? (v) => setState(() => _deliveryMethod = v!)
+                          : null,
+                      subtitle: widget.rental?.isDelivery != 'yes'
+                          ? const Text('Produk ini tidak bisa dikirim', style: TextStyle(color: Colors.red, fontSize: 12))
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+              
+              if (_deliveryMethod == 'delivery') ...[
+                const SizedBox(height: 16),
+                const Text('Alamat pengiriman akan diambil dari profil Anda.',
+                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+              ],
 
-              TextFormField(
-                controller: _addressCtrl,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Alamat Pengiriman',
-                  hintText: 'Jalan, Kelurahan, Kecamatan, Kota',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_on_outlined),
-                ),
-                validator: (v) => v!.isEmpty ? 'Alamat wajib diisi' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneCtrl,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Nomor HP',
-                  hintText: '08xxxxxxxxxx',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone_outlined),
-                ),
-                validator: (v) => v!.isEmpty ? 'Nomor HP wajib diisi' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _notesCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Catatan (opsional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.note_outlined),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity, height: 52,
                 child: ElevatedButton.icon(
@@ -153,13 +196,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   icon: isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check_circle_outline),
-                  label: const Text('Buat Pesanan', style: TextStyle(fontSize: 16)),
+                  label: const Text('Konfirmasi & Bayar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Color(0xFF64748B))),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+      ],
     );
   }
 }

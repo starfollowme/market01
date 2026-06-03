@@ -13,14 +13,14 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl  = TextEditingController();
-  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   final _passCtrl  = TextEditingController();
   final _confCtrl  = TextEditingController();
   bool _obscure = true;
 
   @override
   void dispose() {
-    _nameCtrl.dispose(); _emailCtrl.dispose();
+    _nameCtrl.dispose(); _phoneCtrl.dispose();
     _passCtrl.dispose(); _confCtrl.dispose();
     super.dispose();
   }
@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
     final ok = await auth.register(
-      _nameCtrl.text.trim(), _emailCtrl.text.trim(),
+      _nameCtrl.text.trim(), _phoneCtrl.text.trim(),
       _passCtrl.text, _confCtrl.text,
     );
     if (!mounted) return;
@@ -60,10 +60,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined), border: OutlineInputBorder()),
-                validator: (v) => v!.isEmpty ? 'Email wajib diisi' : null,
+                controller: _phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Nomor WhatsApp / HP', prefixIcon: Icon(Icons.phone_outlined), border: OutlineInputBorder()),
+                validator: (v) => v!.isEmpty ? 'Nomor HP wajib diisi' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(

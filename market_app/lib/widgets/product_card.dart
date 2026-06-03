@@ -45,7 +45,7 @@ class ProductCard extends StatelessWidget {
                   Center(
                     child: Icon(Icons.image_outlined,
                       size: 48,
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.3)),
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.3)),
                   ),
                   if (product.category != null)
                     Positioned(
@@ -68,7 +68,7 @@ class ProductCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF6366F1),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ),
@@ -99,11 +99,12 @@ class ProductCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Rp ${_formatPrice(product.price)}',
+                        Text(
+                          'Rp ${_formatPrice(product.primaryRental?.price ?? 0)} / ${product.primaryRental?.cycleValue ?? 1} hari',
                           style: const TextStyle(
-                            color: Color(0xFF6366F1),
+                            color: Color(0xFF2563EB),
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -111,13 +112,13 @@ class ProductCard extends StatelessWidget {
                           children: [
                             Icon(Icons.inventory_2_outlined,
                               size: 12,
-                              color: product.stock > 10 ? const Color(0xFF10B981) : const Color(0xFFF59E0B)),
+                              color: const Color(0xFF10B981)),
                             const SizedBox(width: 4),
                             Text(
-                              'Stok: ${product.stock}',
+                              product.condition ?? 'Bagus',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: product.stock > 10 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                                color: const Color(0xFF10B981),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/cart_provider.dart';
+// Cart provider removed
 import '../../providers/product_provider.dart';
 import '../../widgets/loading_shimmer.dart';
 import '../../widgets/product_card.dart';
@@ -26,9 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().loadCategories();
       context.read<ProductProvider>().loadProducts(refresh: true);
-      if (context.read<AuthProvider>().isLoggedIn) {
-        context.read<CartProvider>().loadCart();
-      }
+      // Cart logic removed
     });
     _scrollCtrl.addListener(() {
       if (_scrollCtrl.position.pixels >= _scrollCtrl.position.maxScrollExtent - 200) {
@@ -48,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final products = context.watch<ProductProvider>();
-    final cart = context.watch<CartProvider>();
+    // Cart provider removed
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -68,30 +66,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+                    gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)]),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.shopping_bag_rounded, size: 20, color: Colors.white),
+                  child: const Icon(Icons.car_rental, size: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 12),
-                const Text('Market', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Rentdago', style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
             actions: [
-              if (auth.isLoggedIn)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: badges.Badge(
-                    badgeContent: Text('${cart.count}',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                    showBadge: cart.count > 0,
-                    badgeStyle: const badges.BadgeStyle(badgeColor: Color(0xFFEC4899)),
-                    child: IconButton(
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      onPressed: () => context.push('/cart'),
-                    ),
-                  ),
-                ),
+              // Cart icon removed
               if (!auth.isLoggedIn)
                 TextButton(onPressed: () => context.push('/login'), child: const Text('Masuk')),
               if (auth.isLoggedIn)
@@ -100,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     radius: 16,
                     backgroundColor: const Color(0xFFEEF2FF),
                     child: Text(auth.user?.name[0].toUpperCase() ?? 'U',
-                      style: const TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.bold)),
+                      style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
                   itemBuilder: (_) => [
                     PopupMenuItem(
@@ -121,9 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () async {
                           Navigator.pop(context);
                           final authProv = context.read<AuthProvider>();
-                          final cartProv = context.read<CartProvider>();
                           await authProv.logout();
-                          if (mounted) cartProv.clear();
                         },
                       ),
                     ),
@@ -188,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           label: const Text('Semua'),
                           selected: selected,
                           onSelected: (_) => context.read<ProductProvider>().setCategory(''),
-                          selectedColor: const Color(0xFF6366F1),
+                          selectedColor: const Color(0xFF2563EB),
                           labelStyle: TextStyle(color: selected ? Colors.white : const Color(0xFF64748B)),
                         ),
                       );
@@ -201,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: Text(cat.name),
                         selected: selected,
                         onSelected: (_) => context.read<ProductProvider>().setCategory(cat.slug),
-                        selectedColor: const Color(0xFF6366F1),
+                        selectedColor: const Color(0xFF2563EB),
                         labelStyle: TextStyle(color: selected ? Colors.white : const Color(0xFF64748B)),
                       ),
                     );
@@ -245,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final p = products.products[i];
                             return ProductCard(
                               product: p,
-                              onTap: () => context.push('/products/${p.slug}'),
+                              onTap: () => context.push('/products/${p.id}'),
                             ).animate().fadeIn(delay: (i * 50).ms).scale(begin: const Offset(0.8, 0.8));
                           },
                           childCount: products.products.length + (products.hasMore ? 1 : 0),

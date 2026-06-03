@@ -2,31 +2,56 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    use HasFactory;
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description',
-        'price', 'stock', 'image', 'is_active',
+        'code',
+        'category_id',
+        'shop_id',
+        'name',
+        'description',
+        'condition',
+        'is_maintenance'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'price' => 'decimal:2',
-        'stock' => 'integer',
-        'category_id' => 'integer',
+        'is_maintenance' => 'boolean'
     ];
 
-    public function category(): BelongsTo
+    public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function orderItems(): HasMany
+    public function images()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(ProductImage::class);
     }
+
+    public function rentals()
+    {
+        return $this->hasMany(ProductRental::class);
+    }
+
+      public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
+
+        public function orders()
+    {
+        return $this->hasManyThrough(
+            Order::class,
+            ProductRental::class,
+            'product_id',        // FK di product_rentals
+            'product_rental_id', // FK di orders
+            'id',                // PK di products
+            'id'                 // PK di product_rentals
+        );
+    }
+ 
 }

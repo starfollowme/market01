@@ -40,10 +40,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   Color _statusColor(String status) => switch (status) {
     'pending'    => Colors.orange,
-    'processing' => Colors.blue,
-    'shipped'    => Colors.indigo,
-    'delivered'  => Colors.green,
+    'confirmed'  => Colors.blue,
+    'ongoing'    => Colors.indigo,
+    'completed'  => Colors.green,
     'cancelled'  => Colors.red,
+    'penalty'    => Colors.redAccent,
+    'returned'   => Colors.teal,
     _            => Colors.grey,
   };
 
@@ -68,7 +70,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_order!.orderNumber, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(_order!.orderCode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
@@ -81,8 +83,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(_order!.createdAt.length >= 10 ? _order!.createdAt.substring(0, 10) : '',
-                      style: TextStyle(color: Colors.grey[600])),
+                    Text('Dibuat: ${_order!.createdAt}', style: TextStyle(color: Colors.grey[600])),
                   ],
                 ),
               ),
@@ -90,41 +91,39 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
             const SizedBox(height: 12),
 
-            // Items
+            // Rental Detail
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Item Pesanan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text('Informasi Sewa', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const Divider(),
-                    ..._order!.items.map((item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    if (_order!.product != null) ...[
+                      Row(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(item.product?['name'] ?? '-', style: const TextStyle(fontWeight: FontWeight.w600)),
-                                Text('Rp ${_fmt(item.price)} × ${item.quantity}',
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                              ],
-                            ),
-                          ),
-                          Text('Rp ${_fmt(item.subtotal)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          const Icon(Icons.car_rental, color: Color(0xFF2563EB)),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(_order!.product!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15))),
                         ],
                       ),
-                    )),
+                      const SizedBox(height: 12),
+                    ],
+                    _infoRow(Icons.calendar_today, 'Tanggal Mulai', _order!.startTime),
+                    const SizedBox(height: 8),
+                    _infoRow(Icons.event, 'Tanggal Selesai', _order!.endTime),
+                    if (_order!.returnedAt != null) ...[
+                      const SizedBox(height: 8),
+                      _infoRow(Icons.assignment_return, 'Dikembalikan', _order!.returnedAt!),
+                    ],
                     const Divider(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const Text('Total Biaya', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         Text('Rp ${_fmt(_order!.totalPrice)}',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, fontSize: 18)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB), fontSize: 18)),
                       ],
                     ),
                   ],
@@ -134,21 +133,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
             const SizedBox(height: 12),
 
-            // Shipping info
+            // Delivery & Payment
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Info Pengiriman', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text('Pengiriman & Pembayaran', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const Divider(),
-                    _infoRow(Icons.location_on_outlined, 'Alamat', _order!.shippingAddress),
+                    _infoRow(Icons.local_shipping_outlined, 'Metode Pengiriman',
+                      _order!.deliveryMethod == 'pickup' ? 'Ambil di Toko' : 'Kirim ke Alamat'),
                     const SizedBox(height: 8),
-                    _infoRow(Icons.phone_outlined, 'No. HP', _order!.phone),
-                    if (_order!.notes != null && _order!.notes!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      _infoRow(Icons.note_outlined, 'Catatan', _order!.notes!),
+                    if (_order!.payment != null) ...[
+                      _infoRow(Icons.payment, 'Status Pembayaran', _order!.payment!.status),
                     ],
                   ],
                 ),

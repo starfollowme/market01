@@ -22,10 +22,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Color _statusColor(String status) {
     return switch (status) {
       'pending'    => Colors.orange,
-      'processing' => Colors.blue,
-      'shipped'    => Colors.indigo,
-      'delivered'  => Colors.green,
+      'confirmed'  => Colors.blue,
+      'ongoing'    => Colors.indigo,
+      'completed'  => Colors.green,
       'cancelled'  => Colors.red,
+      'penalty'    => Colors.redAccent,
+      'returned'   => Colors.teal,
       _            => Colors.grey,
     };
   }
@@ -59,7 +61,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       const SizedBox(height: 12),
                       Text('Belum ada pesanan', style: TextStyle(color: Colors.grey[600])),
                       const SizedBox(height: 16),
-                      ElevatedButton(onPressed: () => context.go('/'), child: const Text('Mulai Belanja')),
+                      ElevatedButton(onPressed: () => context.go('/'), child: const Text('Mulai Sewa')),
                     ],
                   ),
                 )
@@ -75,7 +77,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(order.orderNumber, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(order.orderCode, style: const TextStyle(fontWeight: FontWeight.bold)),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
@@ -92,9 +94,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           children: [
                             const SizedBox(height: 8),
                             Text('Rp ${_fmt(order.totalPrice)}',
-                              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                              style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 4),
-                            Text(order.createdAt.substring(0, 10), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                            Text('Tgl Sewa: ${order.startTime} - ${order.endTime}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                           ],
                         ),
                         onTap: () => context.push('/orders/${order.id}'),

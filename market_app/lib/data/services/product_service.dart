@@ -29,13 +29,11 @@ class ProductService {
     };
   }
 
-  Future<Map<String, dynamic>> getProduct(String slug) async {
-    final res = await _dio.get('/products/$slug');
+  Future<Map<String, dynamic>> getProduct(int id) async {
+    final res = await _dio.get('/products/$id');
     return {
-      'product': ProductModel.fromJson(res.data['product']),
-      'related': (res.data['related'] as List)
-          .map((e) => ProductModel.fromJson(e))
-          .toList(),
+      'product': ProductModel.fromJson(res.data['data']),
+      'related': [], // TODO: implement related products API
     };
   }
 

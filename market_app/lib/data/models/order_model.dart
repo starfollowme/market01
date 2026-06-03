@@ -1,65 +1,102 @@
-class OrderItemModel {
-  final int id;
-  final int quantity;
-  final double price;
-  final Map<String, dynamic>? product;
+import 'product_model.dart';
 
-  OrderItemModel({
+class PaymentModel {
+  final int id;
+  final double amount;
+  final String status;
+  final String paymentMethod;
+
+  PaymentModel({
     required this.id,
-    required this.quantity,
-    required this.price,
-    this.product,
+    required this.amount,
+    required this.status,
+    required this.paymentMethod,
   });
 
-  double get subtotal => price * quantity;
-
-  factory OrderItemModel.fromJson(Map<String, dynamic> json) => OrderItemModel(
-        id: json['id'],
-        quantity: json['quantity'],
-        price: double.tryParse(json['price'].toString()) ?? 0,
-        product: json['product'],
+  factory PaymentModel.fromJson(Map<String, dynamic> json) => PaymentModel(
+        id: int.tryParse(json['id'].toString()) ?? 0,
+        amount: double.tryParse(json['amount'].toString()) ?? 0,
+        status: json['status']?.toString() ?? 'pending',
+        paymentMethod: json['payment_method']?.toString() ?? '',
       );
 }
 
 class OrderModel {
   final int id;
-  final String orderNumber;
-  final double totalPrice;
+  final String orderCode;
+  final String startTime;
+  final String endTime;
+  final String? returnedAt;
   final String status;
-  final String statusLabel;
-  final String shippingAddress;
-  final String phone;
-  final String? notes;
+  final String deliveryMethod;
+  final ProductModel? product; 
+  final ProductRentalModel? productRental;
+  final PaymentModel? payment;
   final String createdAt;
-  final List<OrderItemModel> items;
 
   OrderModel({
     required this.id,
-    required this.orderNumber,
-    required this.totalPrice,
+    required this.orderCode,
+    required this.startTime,
+    required this.endTime,
+    this.returnedAt,
     required this.status,
-    required this.statusLabel,
-    required this.shippingAddress,
-    required this.phone,
-    this.notes,
+    required this.deliveryMethod,
+    this.product,
+    this.productRental,
+    this.payment,
     required this.createdAt,
-    this.items = const [],
   });
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
-        id: json['id'],
-        orderNumber: json['order_number'],
-        totalPrice: double.tryParse(json['total_price'].toString()) ?? 0,
-        status: json['status'],
-        statusLabel: json['status_label'] ?? json['status'],
-        shippingAddress: json['shipping_address'],
-        phone: json['phone'],
-        notes: json['notes'],
-        createdAt: json['created_at'] ?? '',
-        items: json['items'] != null
-            ? (json['items'] as List)
-                .map((e) => OrderItemModel.fromJson(e))
-                .toList()
-            : [],
-      );
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // In OrderRentalApiController, we return:
+    // Order::with(['productRental.product.images', 'payment', 'address'])
+    
+    ProductModel? pModel;
+    ProductRentalModel? prModel;
+
+    if (json['product_rental'] != null) {
+      prModel = ProductRentalModel.fromJson(json['product_rental']);
+      if (json['product_rental']['product'] != null) {
+        pModel = ProductModel.fromJson(json['product_rental']['product']);
+      }
+    }
+
+    return OrderModel(
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      orderCode: json['order_code']?.toString() ?? '',
+      startTime: json['start_time']?.toString() ?? '',
+      endTime: json['end_time']?.toString() ?? '',
+      returnedAt: json['returned_at']?.toString(),
+      status: json['status']?.toString() ?? 'pending',
+      deliveryMethod: json['delivery_method']?.toString() ?? 'pickup',
+      product: pModel,
+      productRental: prModel,
+      payment: json['payment'] != null ? PaymentModel.fromJson(json['payment']) : null,
+      createdAt: json['created_at']?.toString() ?? '',
+    );
+  }
+
+  double get totalPrice => payment?.amount ?? 0;
+  
+  String get statusLabel {
+    switch (status) {
+      case 'pending':
+        return 'Menunggu Pembayaran';
+      case 'confirmed':
+        return 'Dikonfirmasi';
+      case 'ongoing':
+        return 'Sedang Berlangsung';
+      case 'completed':
+        return 'Selesai';
+      case 'cancelled':
+        return 'Dibatalkan';
+      case 'penalty':
+        return 'Denda';
+      case 'returned':
+        return 'Dikembalikan';
+      default:
+        return status;
+    }
+  }
 }

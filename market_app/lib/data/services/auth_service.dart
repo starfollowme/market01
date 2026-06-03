@@ -7,30 +7,44 @@ import '../models/user_model.dart';
 class AuthService {
   final _dio = ApiClient.instance;
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String phone, String password) async {
     final res = await _dio.post('/login', data: {
-      'email': email,
+      'phone': phone,
       'password': password,
     });
-    await _saveToken(res.data['token']);
-    return res.data;
+    
+    if (res.data['success'] == true) {
+      await _saveToken(res.data['data']['token']);
+      return res.data['data']['user'];
+    } else {
+      throw Exception(res.data['message'] ?? 'Login failed');
+    }
   }
 
   Future<Map<String, dynamic>> register(
-      String name, String email, String password, String passwordConfirmation) async {
+      String name, String phone, String password, String passwordConfirmation) async {
     final res = await _dio.post('/register', data: {
       'name': name,
-      'email': email,
+      'phone': phone,
       'password': password,
       'password_confirmation': passwordConfirmation,
     });
-    await _saveToken(res.data['token']);
-    return res.data;
+    
+    if (res.data['success'] == true) {
+      await _saveToken(res.data['data']['token']);
+      return res.data['data']['user'];
+    } else {
+      throw Exception(res.data['message'] ?? 'Registration failed');
+    }
   }
 
   Future<UserModel> getMe() async {
     final res = await _dio.get('/me');
-    return UserModel.fromJson(res.data);
+    if (res.data['success'] == true) {
+      return UserModel.fromJson(res.data['data']);
+    } else {
+      throw Exception('Failed to get user');
+    }
   }
 
   Future<void> logout() async {

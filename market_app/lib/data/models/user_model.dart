@@ -1,15 +1,27 @@
 class UserModel {
   final int id;
   final String name;
-  final String email;
+  final String phone;
+  final String role;
 
-  UserModel({required this.id, required this.name, required this.email});
+  UserModel({
+    required this.id, 
+    required this.name, 
+    required this.phone,
+    required this.role,
+  });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        id: json['id'],
-        name: json['name'],
-        email: json['email'],
+        id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+        name: json['name'] ?? '',
+        phone: json['phone'] ?? '',
+        role: json['role'] ?? 'customer',
       );
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'email': email};
+  Map<String, dynamic> toJson() => {
+    'id': id, 
+    'name': name, 
+    'phone': phone,
+    'role': role,
+  };
 }

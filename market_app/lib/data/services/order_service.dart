@@ -13,19 +13,23 @@ class OrderService {
 
   Future<OrderModel> getOrder(int id) async {
     final res = await _dio.get('/orders/$id');
-    return OrderModel.fromJson(res.data['order']);
+    return OrderModel.fromJson(res.data['data']);
   }
 
   Future<OrderModel> createOrder({
-    required String shippingAddress,
-    required String phone,
-    String? notes,
+    required int productRentalId,
+    required String startTime,
+    required String endTime,
+    required String deliveryMethod,
+    int? userAddressId,
   }) async {
     final res = await _dio.post('/orders', data: {
-      'shipping_address': shippingAddress,
-      'phone': phone,
-      if (notes != null && notes.isNotEmpty) 'notes': notes,
+      'product_rental_id': productRentalId,
+      'start_time': startTime,
+      'end_time': endTime,
+      'delivery_method': deliveryMethod,
+      if (userAddressId != null) 'user_address_id': userAddressId,
     });
-    return OrderModel.fromJson(res.data['order']);
+    return OrderModel.fromJson(res.data['data']);
   }
 }

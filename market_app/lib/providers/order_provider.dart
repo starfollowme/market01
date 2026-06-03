@@ -36,18 +36,22 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<OrderModel?> createOrder({
-    required String shippingAddress,
-    required String phone,
-    String? notes,
+    required int productRentalId,
+    required String startTime,
+    required String endTime,
+    required String deliveryMethod,
+    int? userAddressId,
   }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
       final order = await _service.createOrder(
-        shippingAddress: shippingAddress,
-        phone: phone,
-        notes: notes,
+        productRentalId: productRentalId,
+        startTime: startTime,
+        endTime: endTime,
+        deliveryMethod: deliveryMethod,
+        userAddressId: userAddressId,
       );
       return order;
     } catch (e) {

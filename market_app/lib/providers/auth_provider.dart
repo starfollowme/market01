@@ -26,13 +26,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String phone, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      final data = await _service.login(email, password);
-      _user = UserModel.fromJson(data['user']);
+      final data = await _service.login(phone, password);
+      _user = UserModel.fromJson(data);
       return true;
     } catch (e) {
       _error = _parseError(e);
@@ -43,13 +43,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> register(String name, String email, String password, String confirm) async {
+  Future<bool> register(String name, String phone, String password, String confirm) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      final data = await _service.register(name, email, password, confirm);
-      _user = UserModel.fromJson(data['user']);
+      final data = await _service.register(name, phone, password, confirm);
+      _user = UserModel.fromJson(data);
       return true;
     } catch (e) {
       _error = _parseError(e);

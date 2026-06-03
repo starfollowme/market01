@@ -13,13 +13,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
-    final ok = await auth.login(_emailCtrl.text.trim(), _passCtrl.text);
+    final ok = await auth.login(_phoneCtrl.text.trim(), _passCtrl.text);
     if (!mounted) return;
     if (ok) {
       context.go('/');
@@ -67,12 +67,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 80,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
                       ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.4),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -119,14 +119,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         children: [
                           TextFormField(
-                            controller: _emailCtrl,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: _phoneCtrl,
+                            keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'nama@email.com',
-                              prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF6366F1)),
+                              labelText: 'Nomor WhatsApp / HP',
+                              hintText: '081234567890',
+                              prefixIcon: const Icon(Icons.phone_outlined, color: Color(0xFF2563EB)),
                             ),
-                            validator: (v) => v!.isEmpty ? 'Email wajib diisi' : null,
+                            validator: (v) => v!.isEmpty ? 'Nomor HP wajib diisi' : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               hintText: '••••••••',
-                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF6366F1)),
+                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF2563EB)),
                               suffixIcon: IconButton(
                                 icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility,
                                   color: const Color(0xFF94A3B8)),
