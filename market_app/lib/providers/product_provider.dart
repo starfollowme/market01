@@ -48,7 +48,8 @@ class ProductProvider extends ChangeNotifier {
       _products.addAll(newProducts);
       _currentPage++;
       _hasMore = result['current_page'] < result['last_page'];
-    } catch (_) {
+    } catch (e) {
+      print("ERROR FETCHING PRODUCTS: $e");
       _hasMore = false;
     } finally {
       _isLoading = false;
